@@ -1031,18 +1031,18 @@
   <source src="dosti.mp3" type="audio/mpeg">
 </audio>
 
-<button onclick="toggleMusic()" class="music-btn">Play Music</button>
+<button onclick="toggleMusic()" class="music-btn">Pause Music</button>
 
 <script>
   function toggleMusic() {
     const music = document.getElementById("bgMusic");
     const btn = document.querySelector(".music-btn");
-    if (music.played) {
-      music.pause();
-      btn.innerText = "Play Music";
-    } else {
+    if (music.pause) {
       music.play();
       btn.innerText = "Pause Music";
+    } else {
+      music.pause();
+      btn.innerText = "Play Music";
     }
   }
 </script>
