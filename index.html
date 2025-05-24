@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>Dosti Never Loses</title>
-
   <style>
     /* ---------- ORIGINAL STYLES ---------- */
     body {
@@ -13,6 +12,7 @@
       color: #0ff;
       margin: 0;
       padding: 0;
+      overflow-x: hidden;
     }
     #intro {
       position: fixed;
@@ -81,8 +81,38 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
+      min-height: 100vh;
     }
+    a {
+      text-decoration: none;
+    }
+
+    /* ---------- NEW FRONT-PAGE STYLES ---------- */
+
+    /* Hero typewriter lines */
+    .hero-container {
+      margin-bottom: 40px;
+      text-align: center;
+      max-width: 800px;
+    }
+    .typewriter-text {
+      font-size: 1.5rem;
+      white-space: nowrap;
+      overflow: hidden;
+      border-right: 2px solid #0ff;
+      display: inline-block;
+      animation: blink-caret 0.75s step-end infinite;
+    }
+    @keyframes typing {
+      from { width: 0; }
+      to { width: 100%; }
+    }
+    @keyframes blink-caret {
+      50% { border-color: transparent; }
+    }
+
+    /* Floating-label form styles */
     .form-box {
       background: #000;
       border: 2px solid #0ff;
@@ -91,25 +121,41 @@
       padding: 30px;
       max-width: 400px;
       width: 100%;
+      position: relative;
     }
-    .form-header {
-      font-size: 1rem;
-      margin: 10px 0 5px;
+    .floating-label {
+      position: relative;
+      margin-bottom: 20px;
     }
-    input {
+    .floating-label input {
       width: 100%;
       padding: 10px;
+      background: transparent;
+      border: 1px solid #0ff;
       border-radius: 8px;
-      border: none;
-      margin-bottom: 10px;
+      color: #0ff;
       font-size: 1rem;
-      background: #e6f0ff;
-      box-shadow: 0 0 5px #0ff;
+      outline: none;
+    }
+    .floating-label label {
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      color: #aaa;
+      transition: 0.2s;
+      pointer-events: none;
+      font-size: 1rem;
+    }
+    .floating-label input:focus + label,
+    .floating-label input:not(:placeholder-shown) + label {
+      top: -10px;
+      font-size: 0.85rem;
+      color: #0ff;
     }
     .submit-btn {
       width: 100%;
       padding: 10px;
-      margin-top: 15px;
+      margin-top: 10px;
       font-size: 1rem;
       border: none;
       border-radius: 10px;
@@ -118,34 +164,29 @@
       cursor: pointer;
       box-shadow: 0 0 10px #00f, 0 0 20px #f0f;
     }
-    .msg {
-      margin-top: 15px;
-      font-size: .95rem;
-      text-align: center;
-      white-space: pre-line;
-      text-shadow: 0 0 10px #0ff;
-    }
-    .video-btn {
-      width: 100%;
-      margin-top: 10px;
-      padding: 10px;
+    /* Success toast */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 12px 24px;
+      background: #0f0;
+      color: #000;
+      border-radius: 8px;
       font-size: 1rem;
-      border: none;
-      border-radius: 10px;
-      background: linear-gradient(45deg, #00f, #f0f);
-      color: #fff;
-      cursor: pointer;
-      box-shadow: 0 0 8px #0ff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      opacity: 0;
+      animation: fadeInOut 3s forwards;
+      z-index: 2000;
     }
-    .watch-heading {
-      margin-top: 25px;
-      font-size: 1.2rem;
-      text-align: center;
-      text-shadow: 0 0 10px #0ff;
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateY(20px); }
+      10% { opacity: 1; transform: translateY(0); }
+      90% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(20px); }
     }
-    a {
-      text-decoration: none;
-    }
+
+    /* ---------- SETTINGS PANEL & OTHER EXISTING STYLES (UNCHANGED) ---------- */
     #settingsBtn {
       position: fixed;
       top: 15px;
@@ -202,6 +243,11 @@
     }
     .profile {
       margin-bottom: 30px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 15px;
+      border-radius: 12px;
     }
     .profile h3 {
       margin-bottom: 10px;
@@ -267,8 +313,6 @@
       border: none;
       cursor: pointer;
     }
-
-    /* ---------- FULLSCREEN IMAGE MODAL ---------- */
     #imageModal {
       display: none;
       position: fixed;
@@ -330,44 +374,107 @@
       color: #f00;
       background: rgba(0, 0, 0, .8);
     }
-  </style>
-</head>
 
+    /* ---------- NEW FEATURES IN SETTINGS PANEL ---------- */
+    /* 25 & 27. Canvas layers for Night Sky + Fireflies */
+    #starCanvas, #fireflyCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+    }
+    /* 30. Floating Heart Trails */
+    .heart {
+      position: absolute;
+      font-size: 16px;
+      color: pink;
+      pointer-events: none;
+      animation: floatUp 2s ease-out forwards;
+    }
+    @keyframes floatUp {
+      to {
+        transform: translateY(-50px);
+        opacity: 0;
+      }
+    }
+    /* 28. Parallax: simple selector */
+    .parallax {
+      position: relative;
+      will-change: transform;
+    }
+    /* 26. Handwritten Signature (SVG text) */
+    #signatureSVG text {
+      fill: none;
+      stroke: #0ff;
+      stroke-width: 2;
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      font-family: 'Pacifico', cursive;
+      font-size: 2rem;
+    }
+    @keyframes draw {
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+  </style>
+  <!-- Google Font for signature (Pacifico) -->
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+</head>
 <body>
   <!-- ---------- INTRO SPLASH ---------- -->
   <div id="intro">
-    <!-- Intro image दिखाने के लिए सुनिश्चित करें कि "images/intro.png" फोल्डर में मौजूद हो -->
     <img src="intro.png" alt="Intro">
   </div>
 
   <!-- ---------- MAIN CONTENT ---------- -->
   <div id="main-content">
+    <!-- Hero section with rotating shayari lines -->
+    <div class="hero-container">
+      <h2 class="typewriter-text"></h2>
+    </div>
+
+    <!-- Rotating sphere -->
     <div class="rotating-sphere">
       <div class="face front">ANS</div>
       <div class="face back">NaitikSingh</div>
     </div>
 
+    <!-- Form box with floating labels -->
     <div class="form-box">
-      <h3 class="form-header">Full Name</h3>
-      <input type="text" id="nameInput" placeholder="Enter your name">
-      <h3 class="form-header">Mobile Number</h3>
-      <input type="text" id="mobileInput" placeholder="Enter your number">
-      <h3 class="form-header">Email</h3>
-      <input type="email" id="emailInput" placeholder="Enter your email">
-      <button class="submit-btn" onclick="handleSubmit()">🚀submit</button>
+      <h3 class="form-header">Fill Your Details</h3>
+
+      <div class="floating-label">
+        <input type="text" id="nameInput" placeholder=" " required>
+        <label for="nameInput">Full Name</label>
+      </div>
+
+      <div class="floating-label">
+        <input type="text" id="mobileInput" placeholder=" " required>
+        <label for="mobileInput">Mobile Number</label>
+      </div>
+
+      <div class="floating-label">
+        <input type="email" id="emailInput" placeholder=" " required>
+        <label for="emailInput">Email Address</label>
+      </div>
+
+      <button class="submit-btn" onclick="handleSubmit()">🚀 Submit</button>
 
       <div class="msg" id="messageBox" style="display:none"></div>
 
       <div id="videoSection" style="display:none">
-        <h2 class="watch-heading">🎵Watch Videos:</h2>
+        <h2 class="watch-heading">🎵 Watch Videos:</h2>
         <a href="https://youtu.be/f72iVBTuSbw?si=yrpkT7uudpRakq7T" target="_blank">
-          <button class="video-btn">😂AdiNaiSat</button>
+          <button class="video-btn">😂 AdiNaiSat</button>
         </a>
         <a href="https://youtu.be/IgM1lAXppwI?si=TywO3SPv1tPph8KW" target="_blank">
-          <button class="video-btn">🎶YouTube🥺</button>
+          <button class="video-btn">🎶 YouTube 🥺</button>
         </a>
         <a href="https://youtu.be/BTRPBiE_1lA?si=CIZYJGp-V0m0cauU" target="_blank">
-          <button class="video-btn">🎤friends forever ☺️</button>
+          <button class="video-btn">🎤 friends forever ☺️</button>
         </a>
       </div>
     </div>
@@ -377,6 +484,9 @@
   <button id="settingsBtn">⚙️</button>
 
   <div id="settingsPanel">
+    <!-- Canvas layers sit behind all content -->
+    <canvas id="starCanvas"></canvas>
+    <canvas id="fireflyCanvas"></canvas>
     <button id="closeSettings" onclick="closeSettings()">close ⚙️</button>
 
     <div id="passwordPrompt">
@@ -387,9 +497,10 @@
     </div>
 
     <div id="settingsContent" style="display:none">
+      <!-- Profiles (glassmorphic, with parallax class) -->
       <h2 class="section-title">Profiles</h2>
 
-      <div class="profile">
+      <div class="profile parallax">
         <h3>NAITIK</h3>
         <div class="photos">
           <img src="naitik1.jpg" alt="rajput">
@@ -401,7 +512,7 @@
         </p>
       </div>
 
-      <div class="profile">
+      <div class="profile parallax">
         <h3>SATYAM</h3>
         <div class="photos">
           <img src="satyam1.jpg" alt="Satyam 1">
@@ -413,7 +524,7 @@
         </p>
       </div>
 
-      <div class="profile">
+      <div class="profile parallax">
         <h3>ADITYA</h3>
         <div class="photos">
           <img src="aditya1.jpg" alt="Aditya 1">
@@ -425,24 +536,30 @@
         </p>
       </div>
 
-      <h2 class="section-title">About</h2>
-      <p class="about-text">
+      <h2 class="section-title parallax">About</h2>
+      <p class="about-text parallax">
         हमने इस वेबसाइट को इसलिए बनाया क्योंकि हमारी दोस्ती खास है।<br>
         यह यादें, इमोशंस और हँसी के लम्हों को हमेशा ज़िंदा रखती है।
       </p>
 
-      <h2 class="section-title">School Life</h2>
-      <p class="about-text">
+      <h2 class="section-title parallax">School Life</h2>
+      <p class="about-text parallax">
         स्कूल का हर दिन खास था <br>
         हमारे नम्बर भले कम आए हों<br>
         पर दुखी मत हो भाई <br>
         जो होता है भले के लिए होता है
       </p>
 
-      <div class="contact-section">
+      <div class="contact-section parallax">
         <p>Phone: 9005222683📞</p>
         <p><em>Wait for your call</em></p>
       </div>
+
+      <!-- 26. Handwritten Signature Effect -->
+      <h2 class="section-title parallax">Signature</h2>
+      <input type="text" id="signatureInput" placeholder="Enter name for signature">
+      <button onclick="drawSignature()">Draw Signature</button>
+      <svg id="signatureSVG" width="100%" height="80"></svg>
     </div>
   </div>
 
@@ -457,27 +574,71 @@
 
   <!-- ---------- SCRIPTS ---------- -->
   <script>
-    /* intro hide after 4s */
+    /* ---------- INTRO LOGIC ---------- */
     window.addEventListener('load', () => {
       setTimeout(() => {
         document.getElementById('intro').style.display = 'none';
         document.getElementById('main-content').style.display = 'flex';
+        startHeroTyping();
       }, 4000);
     });
 
-    /* form submit */
+    /* ---------- HERO TYPEWRITER LINES ---------- */
+    const heroLines = [
+      "Tere bina zindagi se koi shikwa to nahi...",
+      "Chand bhi sharma jaye teri roshni se...",
+      "Khamoshiyon mein bhi ek dastaan hoti hai..."
+    ];
+    let heroIndex = 0;
+    function startHeroTyping() {
+      typeHeroLine();
+    }
+    function typeHeroLine() {
+      const element = document.querySelector('.typewriter-text');
+      const text = heroLines[heroIndex];
+      let char = 0;
+      element.textContent = "";
+      element.style.width = "0";
+      element.style.animation = '';
+      const typer = setInterval(() => {
+        element.textContent += text[char++];
+        element.style.width = `${char}ch`;
+        if (char === text.length) {
+          clearInterval(typer);
+          setTimeout(() => {
+            heroIndex = (heroIndex + 1) % heroLines.length;
+            typeHeroLine();
+          }, 2500);
+        }
+      }, 80);
+    }
+
+    /* ---------- FORM SUBMIT & SUCCESS TOAST ---------- */
     function handleSubmit() {
       const name = document.getElementById('nameInput').value.trim();
-      if (name !== '') {
+      const mobile = document.getElementById('mobileInput').value.trim();
+      const email = document.getElementById('emailInput').value.trim();
+      if (name && mobile && email) {
+        // Show message below form
         document.getElementById('messageBox').innerText = `Hello ${name}!\nI miss you bhai`;
         document.getElementById('messageBox').style.display = 'block';
         document.getElementById('videoSection').style.display = 'block';
+        // Show success toast
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = 'Form submitted successfully!';
+        document.body.appendChild(toast);
+        setTimeout(() => {
+          toast.remove();
+        }, 3000);
       }
     }
 
-    /* settings panel */
+    /* ---------- SETTINGS PANEL & PASSWORD ---------- */
     document.getElementById('settingsBtn').addEventListener('click', () => {
       document.getElementById('settingsPanel').classList.add('active');
+      initSky();         // initialize canvases when panel opens
+      initFireflies();
     });
     function verifyPassword() {
       const input = document.getElementById('pwdInput').value.trim();
@@ -506,7 +667,6 @@
       images.push(img);
       img.addEventListener('click', () => openImageModal(idx));
     });
-
     function openImageModal(idx) {
       currentIndex = idx;
       const modal = document.getElementById('imageModal');
@@ -522,7 +682,6 @@
       document.getElementById('modalImage').src = images[currentIndex].src;
       document.getElementById('modalCaption').textContent = images[currentIndex].alt || '';
     }
-    /* keyboard nav */
     document.addEventListener('keydown', e => {
       const modal = document.getElementById('imageModal');
       if (modal.style.display === 'flex') {
@@ -531,6 +690,191 @@
         else if (e.key === 'Escape') closeImageModal();
       }
     });
+
+    /* ---------- NEW FEATURE SCRIPTS IN SETTINGS ---------- */
+
+    /* 25. Animated Night Sky with Shooting Stars */
+    let starCanvas, starCtx, stars = [], shootingStars = [];
+    function initSky() {
+      const panel = document.getElementById('settingsPanel');
+      starCanvas = document.getElementById('starCanvas');
+      starCtx = starCanvas.getContext('2d');
+      resizeCanvasToPanel(starCanvas, panel);
+      createStars();
+      requestAnimationFrame(animateSky);
+    }
+    function resizeCanvasToPanel(canvas, panel) {
+      canvas.width = panel.clientWidth;
+      canvas.height = panel.clientHeight;
+    }
+    window.addEventListener('resize', () => {
+      if (starCanvas) {
+        const panel = document.getElementById('settingsPanel');
+        resizeCanvasToPanel(starCanvas, panel);
+        resizeCanvasToPanel(fireflyCanvas, panel);
+      }
+    });
+    function createStars() {
+      stars = [];
+      for (let i = 0; i < 150; i++) {
+        stars.push({
+          x: Math.random() * starCanvas.width,
+          y: Math.random() * starCanvas.height,
+          radius: Math.random() * 1.2,
+          alpha: Math.random(),
+          alphaDir: Math.random() * 0.02 + 0.005
+        });
+      }
+    }
+    function animateSky() {
+      starCtx.clearRect(0, 0, starCanvas.width, starCanvas.height);
+      // Draw Twinkling Stars
+      stars.forEach(s => {
+        s.alpha += s.alphaDir;
+        if (s.alpha <= 0 || s.alpha >= 1) s.alphaDir *= -1;
+        starCtx.beginPath();
+        starCtx.arc(s.x, s.y, s.radius, 0, 2 * Math.PI);
+        starCtx.fillStyle = `rgba(255,255,255,${s.alpha})`;
+        starCtx.fill();
+      });
+      // Possibly create a new shooting star
+      if (Math.random() < 0.005) createShootingStar();
+      // Animate existing shooting stars
+      shootingStars.forEach((ss, idx) => {
+        ss.x += ss.vx;
+        ss.y += ss.vy;
+        ss.life--;
+        // draw
+        starCtx.beginPath();
+        starCtx.moveTo(ss.x, ss.y);
+        starCtx.lineTo(ss.x - ss.length * ss.vx, ss.y - ss.length * ss.vy);
+        starCtx.strokeStyle = 'rgba(255,255,255,' + (ss.life / ss.maxLife) + ')';
+        starCtx.lineWidth = 1.5;
+        starCtx.stroke();
+        if (ss.life <= 0) shootingStars.splice(idx, 1);
+      });
+      requestAnimationFrame(animateSky);
+    }
+    function createShootingStar() {
+      const sx = Math.random() * starCanvas.width * 0.5;
+      const sy = Math.random() * starCanvas.height * 0.3;
+      const angle = Math.PI / 4 + (Math.random() * (Math.PI / 6) - Math.PI / 12);
+      const speed = Math.random() * 4 + 4;
+      const vx = Math.cos(angle) * speed;
+      const vy = Math.sin(angle) * speed;
+      shootingStars.push({
+        x: sx,
+        y: sy,
+        vx: vx,
+        vy: vy,
+        length: Math.random() * 80 + 60,
+        life: Math.floor(Math.random() * 20 + 20),
+        maxLife: 40
+      });
+    }
+
+    /* 27. Fireflies / Floating Lights */
+    let fireflyCanvas, fireflyCtx, fireflies = [];
+    function initFireflies() {
+      const panel = document.getElementById('settingsPanel');
+      fireflyCanvas = document.getElementById('fireflyCanvas');
+      fireflyCtx = fireflyCanvas.getContext('2d');
+      resizeCanvasToPanel(fireflyCanvas, panel);
+      createFireflies();
+      requestAnimationFrame(animateFireflies);
+    }
+    function createFireflies() {
+      fireflies = [];
+      for (let i = 0; i < 30; i++) {
+        fireflies.push({
+          x: Math.random() * fireflyCanvas.width,
+          y: Math.random() * fireflyCanvas.height,
+          radius: Math.random() * 2 + 1,
+          alpha: Math.random() * 0.5 + 0.5,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3
+        });
+      }
+    }
+    function animateFireflies() {
+      fireflyCtx.clearRect(0, 0, fireflyCanvas.width, fireflyCanvas.height);
+      fireflies.forEach(f => {
+        f.x += f.vx;
+        f.y += f.vy;
+        if (f.x < 0 || f.x > fireflyCanvas.width) f.vx *= -1;
+        if (f.y < 0 || f.y > fireflyCanvas.height) f.vy *= -1;
+        const gradient = fireflyCtx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.radius * 4);
+        gradient.addColorStop(0, `rgba(255,255,153,${f.alpha})`);
+        gradient.addColorStop(1, 'rgba(255,255,153,0)');
+        fireflyCtx.beginPath();
+        fireflyCtx.arc(f.x, f.y, f.radius * 4, 0, 2 * Math.PI);
+        fireflyCtx.fillStyle = gradient;
+        fireflyCtx.fill();
+      });
+      requestAnimationFrame(animateFireflies);
+    }
+
+    /* 28. Parallax Scrolling */
+    const parallaxItems = [];
+    function initParallax() {
+      const panel = document.getElementById('settingsPanel');
+      const elements = panel.querySelectorAll('.parallax');
+      elements.forEach(el => {
+        parallaxItems.push({
+          el,
+          speed: (Math.random() * 0.3) + 0.1
+        });
+      });
+      panel.addEventListener('scroll', () => {
+        const scrollTop = panel.scrollTop;
+        parallaxItems.forEach(item => {
+          item.el.style.transform = `translateY(${scrollTop * item.speed * -1}px)`;
+        });
+      });
+    }
+
+    /* 26. Handwritten Signature Effect */
+    function drawSignature() {
+      const txt = document.getElementById('signatureInput').value.trim();
+      if (!txt) return;
+      const svg = document.getElementById('signatureSVG');
+      svg.innerHTML = '';
+      const textEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      textEl.setAttribute('x', '10');
+      textEl.setAttribute('y', '50');
+      textEl.textContent = txt;
+      svg.appendChild(textEl);
+      const pathLength = textEl.getComputedTextLength();
+      textEl.setAttribute('stroke-dasharray', pathLength);
+      textEl.setAttribute('stroke-dashoffset', pathLength);
+      textEl.style.animation = `draw 3s ease forwards`;
+    }
+
+    /* 30. Floating Heart Trails on Mouse Move */
+    function initHeartTrail() {
+      const panel = document.getElementById('settingsPanel');
+      panel.addEventListener('mousemove', e => {
+        const heart = document.createElement('span');
+        heart.className = 'heart';
+        heart.textContent = '❤️';
+        const rect = panel.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        heart.style.left = x + 'px';
+        heart.style.top = y + 'px';
+        panel.appendChild(heart);
+        setTimeout(() => {
+          heart.remove();
+        }, 2000);
+      });
+    }
+
+    /* Initialize parallax & heart trail once settings panel first shows */
+    document.addEventListener('DOMContentLoaded', () => {
+      initParallax();
+      initHeartTrail();
+    });
   </script>
 </body>
 </html>
+
