@@ -1,880 +1,1066 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>Dosti Never Loses</title>
-  <style>
-    /* ---------- ORIGINAL STYLES ---------- */
-    body {
-      background: #000;
-      font-family: 'Courier New', monospace;
-      color: #0ff;
-      margin: 0;
-      padding: 0;
-      overflow-x: hidden;
-    }
-    #intro {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      animation: hideIntro 1s ease-in-out 4s forwards;
-    }
-    #intro img {
-      width: 768px;
-      height: 768px;
-      animation: zoomInOut 4s ease-in-out forwards;
-      border-radius: 15px;
-      box-shadow: 0 0 20px cyan;
-    }
-    @keyframes zoomInOut {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-      100% { transform: scale(1); }
-    }
-    @keyframes hideIntro {
-      to { opacity: 0; visibility: hidden; }
-    }
-    .rotating-sphere {
-      margin: 20px auto;
-      width: 150px;
-      height: 150px;
-      position: relative;
-      transform-style: preserve-3d;
-      animation: spin 6s linear infinite;
-      perspective: 1000px;
-    }
-    .face {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      background: radial-gradient(circle at center, #000 30%, #0ff 100%);
-      color: red;
-      font-size: 22px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      text-shadow: 0 0 10px red;
-    }
-    .front {
-      transform: rotateY(0) translateZ(75px);
-    }
-    .back {
-      transform: rotateY(180deg) translateZ(75px);
-    }
-    @keyframes spin {
-      from { transform: rotateY(0); }
-      to { transform: rotateY(360deg); }
-    }
-    #main-content {
-      display: none;
-      padding: 40px 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
-    }
-    a {
-      text-decoration: none;
-    }
-
-    /* ---------- NEW FRONT-PAGE STYLES ---------- */
-
-    /* Hero typewriter lines */
-    .hero-container {
-      margin-bottom: 40px;
-      text-align: center;
-      max-width: 800px;
-    }
-    .typewriter-text {
-      font-size: 1.5rem;
-      white-space: nowrap;
-      overflow: hidden;
-      border-right: 2px solid #0ff;
-      display: inline-block;
-      animation: blink-caret 0.75s step-end infinite;
-    }
-    @keyframes typing {
-      from { width: 0; }
-      to { width: 100%; }
-    }
-    @keyframes blink-caret {
-      50% { border-color: transparent; }
-    }
-
-    /* Floating-label form styles */
-    .form-box {
-      background: #000;
-      border: 2px solid #0ff;
-      box-shadow: 0 0 15px #0ff, 0 0 40px #0ff;
-      border-radius: 15px;
-      padding: 30px;
-      max-width: 400px;
-      width: 100%;
-      position: relative;
-    }
-    .floating-label {
-      position: relative;
-      margin-bottom: 20px;
-    }
-    .floating-label input {
-      width: 100%;
-      padding: 10px;
-      background: transparent;
-      border: 1px solid #0ff;
-      border-radius: 8px;
-      color: #0ff;
-      font-size: 1rem;
-      outline: none;
-    }
-    .floating-label label {
-      position: absolute;
-      top: 10px;
-      left: 12px;
-      color: #aaa;
-      transition: 0.2s;
-      pointer-events: none;
-      font-size: 1rem;
-    }
-    .floating-label input:focus + label,
-    .floating-label input:not(:placeholder-shown) + label {
-      top: -10px;
-      font-size: 0.85rem;
-      color: #0ff;
-    }
-    .submit-btn {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      font-size: 1rem;
-      border: none;
-      border-radius: 10px;
-      background: linear-gradient(45deg, #00f, #f0f);
-      color: #fff;
-      cursor: pointer;
-      box-shadow: 0 0 10px #00f, 0 0 20px #f0f;
-    }
-    /* Success toast */
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      padding: 12px 24px;
-      background: #0f0;
-      color: #000;
-      border-radius: 8px;
-      font-size: 1rem;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
-      opacity: 0;
-      animation: fadeInOut 3s forwards;
-      z-index: 2000;
-    }
-    @keyframes fadeInOut {
-      0% { opacity: 0; transform: translateY(20px); }
-      10% { opacity: 1; transform: translateY(0); }
-      90% { opacity: 1; transform: translateY(0); }
-      100% { opacity: 0; transform: translateY(20px); }
-    }
-
-    /* ---------- SETTINGS PANEL & OTHER EXISTING STYLES (UNCHANGED) ---------- */
-    #settingsBtn {
-      position: fixed;
-      top: 15px;
-      left: 15px;
-      z-index: 999;
-      background: #000;
-      color: #0ff;
-      border: 2px solid #0ff;
-      padding: 10px 15px;
-      font-size: 16px;
-      border-radius: 10px;
-      cursor: pointer;
-      box-shadow: 0 0 10px #0ff;
-    }
-    #settingsPanel {
-      position: fixed;
-      top: 0;
-      right: -100%;
-      width: 100%;
-      max-width: 400px;
-      height: 100%;
-      background: #000;
-      color: #0ff;
-      overflow-y: auto;
-      z-index: 10000;
-      box-shadow: -5px 0 20px #0ff;
-      padding: 20px;
-      transition: right .5s ease;
-      font-family: 'Courier New', monospace;
-    }
-    #settingsPanel.active {
-      right: 0;
-    }
-    #settingsPanel input {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
-      font-size: 1rem;
-      background: #e6f0ff;
-      border-radius: 8px;
-      border: none;
-    }
-    #settingsPanel button {
-      width: 100%;
-      padding: 10px;
-      font-size: 1rem;
-      background: linear-gradient(45deg, #00f, #f0f);
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      margin-top: 5px;
-      box-shadow: 0 0 10px #00f, 0 0 20px #f0f;
-    }
-    .profile {
-      margin-bottom: 30px;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      padding: 15px;
-      border-radius: 12px;
-    }
-    .profile h3 {
-      margin-bottom: 10px;
-    }
-    .photos {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-    .photos img {
-      width: 100px;
-      height: 100px;
-      object-fit: cover;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #0ff;
-      cursor: pointer;
-      transition: transform .3s;
-    }
-    .photos img:hover {
-      transform: scale(1.08);
-    }
-    .shayari {
-      font-size: 1rem;
-      text-shadow: 0 0 10px #0ff;
-    }
-    .typewriter {
-      display: inline-block;
-      overflow: hidden;
-      white-space: nowrap;
-      border-right: 2px solid #0ff;
-    }
-    @keyframes typing {
-      from { width: 0; }
-      to { width: 100%; }
-    }
-    @keyframes blink-caret {
-      50% { border-color: transparent; }
-    }
-    .section-title {
-      font-size: 1.3rem;
-      margin: 20px 0 10px;
-      text-shadow: 0 0 10px #0ff;
-    }
-    .about-text {
-      font-size: 1rem;
-      margin-bottom: 20px;
-      white-space: pre-line;
-      text-shadow: 0 0 8px #0ff;
-    }
-    .contact-section {
-      margin-top: 20px;
-      text-align: center;
-      font-size: 1rem;
-      text-shadow: 0 0 10px #0ff;
-    }
-    #closeSettings {
-      position: absolute;
-      top: 10px;
-      right: 15px;
-      background: transparent;
-      color: #0ff;
-      font-size: 24px;
-      border: none;
-      cursor: pointer;
-    }
-    #imageModal {
-      display: none;
-      position: fixed;
-      z-index: 15000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, .95);
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-    }
-    #imageModal img {
-      max-width: 90vw;
-      max-height: 80vh;
-      border-radius: 10px;
-      box-shadow: 0 0 25px #0ff;
-    }
-    #imageModal .caption {
-      margin: 15px auto;
-      text-align: center;
-      color: #0ff;
-      font-size: 1.1rem;
-      text-shadow: 0 0 10px #0ff;
-      max-width: 90%;
-    }
-    #imageModal .closeBtn,
-    #imageModal .prev,
-    #imageModal .next {
-      position: absolute;
-      color: #0ff;
-      font-size: 40px;
-      font-weight: bold;
-      user-select: none;
-      cursor: pointer;
-      background: rgba(0, 0, 0, .5);
-      border-radius: 50%;
-      padding: 5px 12px;
-      transition: .3s;
-    }
-    #imageModal .closeBtn {
-      top: 20px;
-      right: 35px;
-    }
-    #imageModal .prev {
-      top: 50%;
-      left: 20px;
-      transform: translateY(-50%);
-    }
-    #imageModal .next {
-      top: 50%;
-      right: 20px;
-      transform: translateY(-50%);
-    }
-    #imageModal .prev:hover,
-    #imageModal .next:hover,
-    #imageModal .closeBtn:hover {
-      color: #f00;
-      background: rgba(0, 0, 0, .8);
-    }
-
-    /* ---------- NEW FEATURES IN SETTINGS PANEL ---------- */
-    /* 25 & 27. Canvas layers for Night Sky + Fireflies */
-    #starCanvas, #fireflyCanvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -2;
-    }
-    /* 30. Floating Heart Trails */
-    .heart {
-      position: absolute;
-      font-size: 16px;
-      color: pink;
-      pointer-events: none;
-      animation: floatUp 2s ease-out forwards;
-    }
-    @keyframes floatUp {
-      to {
-        transform: translateY(-50px);
-        opacity: 0;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Dosti Never Loses</title>
+    <style>
+      /* ---------- ORIGINAL STYLES ---------- */
+      body {
+        background: #000;
+        font-family: 'Courier New', monospace;
+        color: #0ff;
+        margin: 0;
+        padding: 0;
+        position: relative;
+        overflow-x: hidden;
       }
-    }
-    /* 28. Parallax: simple selector */
-    .parallax {
-      position: relative;
-      will-change: transform;
-    }
-    /* 26. Handwritten Signature (SVG text) */
-    #signatureSVG text {
-      fill: none;
-      stroke: #0ff;
-      stroke-width: 2;
-      stroke-dasharray: 1000;
-      stroke-dashoffset: 1000;
-      font-family: 'Pacifico', cursive;
-      font-size: 2rem;
-    }
-    @keyframes draw {
-      to {
-        stroke-dashoffset: 0;
+
+      /* ---------- CANVAS STYLES FOR MAIN CONTENT ---------- */
+      #starCanvasMain,
+      #fireflyCanvasMain {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1; /* पीछे रहने के लिए */
       }
-    }
-  </style>
-  <!-- Google Font for signature (Pacifico) -->
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
-</head>
-<body>
-  <!-- ---------- INTRO SPLASH ---------- -->
-  <div id="intro">
-    <img src="intro.png" alt="Intro">
-  </div>
 
-  <!-- ---------- MAIN CONTENT ---------- -->
-  <div id="main-content">
-    <!-- Hero section with rotating shayari lines -->
-    <div class="hero-container">
-      <h2 class="typewriter-text"></h2>
-    </div>
-
-    <!-- Rotating sphere -->
-    <div class="rotating-sphere">
-      <div class="face front">ANS</div>
-      <div class="face back">NaitikSingh</div>
-    </div>
-
-    <!-- Form box with floating labels -->
-    <div class="form-box">
-      <h3 class="form-header">Fill Your Details</h3>
-
-      <div class="floating-label">
-        <input type="text" id="nameInput" placeholder=" " required>
-        <label for="nameInput">Full Name</label>
-      </div>
-
-      <div class="floating-label">
-        <input type="text" id="mobileInput" placeholder=" " required>
-        <label for="mobileInput">Mobile Number</label>
-      </div>
-
-      <div class="floating-label">
-        <input type="email" id="emailInput" placeholder=" " required>
-        <label for="emailInput">Email Address</label>
-      </div>
-
-      <button class="submit-btn" onclick="handleSubmit()">🚀 Submit</button>
-
-      <div class="msg" id="messageBox" style="display:none"></div>
-
-      <div id="videoSection" style="display:none">
-        <h2 class="watch-heading">🎵 Watch Videos:</h2>
-        <a href="https://youtu.be/f72iVBTuSbw?si=yrpkT7uudpRakq7T" target="_blank">
-          <button class="video-btn">😂 AdiNaiSat</button>
-        </a>
-        <a href="https://youtu.be/IgM1lAXppwI?si=TywO3SPv1tPph8KW" target="_blank">
-          <button class="video-btn">🎶 YouTube 🥺</button>
-        </a>
-        <a href="https://youtu.be/BTRPBiE_1lA?si=CIZYJGp-V0m0cauU" target="_blank">
-          <button class="video-btn">🎤 friends forever ☺️</button>
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <!-- ---------- SETTINGS BUTTON + PANEL ---------- -->
-  <button id="settingsBtn">⚙️</button>
-
-  <div id="settingsPanel">
-    <!-- Canvas layers sit behind all content -->
-    <canvas id="starCanvas"></canvas>
-    <canvas id="fireflyCanvas"></canvas>
-    <button id="closeSettings" onclick="closeSettings()">close ⚙️</button>
-
-    <div id="passwordPrompt">
-      <h3>Enter Password</h3>
-      <input type="password" id="pwdInput" placeholder="Enter password">
-      <button onclick="verifyPassword()">Unlock</button>
-      <p id="pwdError" class="msg" style="color:red;display:none">Incorrect password!</p>
-    </div>
-
-    <div id="settingsContent" style="display:none">
-      <!-- Profiles (glassmorphic, with parallax class) -->
-      <h2 class="section-title">Profiles</h2>
-
-      <div class="profile parallax">
-        <h3>NAITIK</h3>
-        <div class="photos">
-          <img src="naitik1.jpg" alt="rajput">
-          <img src="naitik2.jpg" alt="naitik">
-          <img src="naitik3.jpg" alt="singh">
-        </div>
-        <p class="shayari">
-          <span class="typewriter">मैं हूं दोस्ती का सबसे प्यारा चेहरा, <br> दिल से जुड़ा, हर वक्त का सहारा।🧐🧐</span>
-        </p>
-      </div>
-
-      <div class="profile parallax">
-        <h3>SATYAM</h3>
-        <div class="photos">
-          <img src="satyam1.jpg" alt="hello">
-          <img src="satyam2.jpg" alt="Satyam">
-          <img src="satyam3.jpg" alt="bhai☺️☺️kya haal hai">
-        </div>
-        <p class="shayari">
-          <span class="typewriter">सच्चाई में बसा नाम है तेरा,<br> दोस्ती की रूह है तू मेरा सच्चा सहारा।🥰🥰</span>
-        </p>
-      </div>
-
-      <div class="profile parallax">
-        <h3>ADITYA</h3>
-        <div class="photos">
-          <img src="aditya1.jpg" alt="hello">
-          <img src="aditya2.jpg" alt="Aditya">
-          <img src="aditya3.jpg" alt="bhai😉😉 kya haal hai">
-        </div>
-        <p class="shayari">
-          <span class="typewriter">तेरी हँसी में जादू है कुछ ऐसा,<br> जो ग़मों को भी मुस्कान बना दे वैसा।😂😂</span>
-        </p>
-      </div>
-
-      <h2 class="section-title parallax">About</h2>
-      <p class="about-text parallax">
-        हमने इस वेबसाइट को इसलिए बनाया क्योंकि हमारी दोस्ती खास है।<br>
-        यह यादें, इमोशंस और हँसी के लम्हों को हमेशा ज़िंदा रखती है।
-      </p>
-
-      <h2 class="section-title parallax">School Life</h2>
-      <p class="about-text parallax">
-        स्कूल का हर दिन खास था <br>
-        हमारे नम्बर भले कम आए हों<br>
-        पर दुखी मत हो भाई <br>
-        जो होता है भले के लिए होता है
-      </p>
-
-      <div class="contact-section parallax">
-        <p>Phone: 9005222683📞</p>
-        <p><em>Wait for your call</em></p>
-      </div>
-
-      <!-- 26. Handwritten Signature Effect -->
-      <h2 class="section-title parallax">Signature</h2>
-      <input type="text" id="signatureInput" placeholder="Enter name for signature">
-      <button onclick="drawSignature()">Draw Signature</button>
-      <svg id="signatureSVG" width="100%" height="80"></svg>
-    </div>
-  </div>
-
-  <!-- ---------- FULLSCREEN IMAGE MODAL STRUCTURE ---------- -->
-  <div id="imageModal">
-    <span class="closeBtn" onclick="closeImageModal()">&times;</span>
-    <span class="prev" onclick="changeImage(-1)">&#10094;</span>
-    <img id="modalImage" src="" alt="Full Image">
-    <span class="next" onclick="changeImage(1)">&#10095;</span>
-    <div class="caption" id="modalCaption"></div>
-  </div>
-
-  <!-- ---------- SCRIPTS ---------- -->
-  <script>
-    /* ---------- INTRO LOGIC ---------- */
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        document.getElementById('intro').style.display = 'none';
-        document.getElementById('main-content').style.display = 'flex';
-        startHeroTyping();
-      }, 4000);
-    });
-
-    /* ---------- HERO TYPEWRITER LINES ---------- */
-    const heroLines = [
-      "Tere bina zindagi se koi shikwa to nahi...",
-      "Chand bhi sharma jaye teri roshni se...",
-      "Khamoshiyon mein bhi ek dastaan hoti hai..."
-    ];
-    let heroIndex = 0;
-    function startHeroTyping() {
-      typeHeroLine();
-    }
-    function typeHeroLine() {
-      const element = document.querySelector('.typewriter-text');
-      const text = heroLines[heroIndex];
-      let char = 0;
-      element.textContent = "";
-      element.style.width = "0";
-      element.style.animation = '';
-      const typer = setInterval(() => {
-        element.textContent += text[char++];
-        element.style.width = `${char}ch`;
-        if (char === text.length) {
-          clearInterval(typer);
-          setTimeout(() => {
-            heroIndex = (heroIndex + 1) % heroLines.length;
-            typeHeroLine();
-          }, 2500);
+      #intro {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        animation: hideIntro 1s ease-in-out 4s forwards;
+      }
+      #intro img {
+        width: 768px;
+        height: 768px;
+        animation: zoomInOut 4s ease-in-out forwards;
+        border-radius: 15px;
+        box-shadow: 0 0 20px cyan;
+      }
+      @keyframes zoomInOut {
+        0% {
+          transform: scale(1);
         }
-      }, 80);
-    }
-
-    /* ---------- FORM SUBMIT & SUCCESS TOAST ---------- */
-    function handleSubmit() {
-      const name = document.getElementById('nameInput').value.trim();
-      const mobile = document.getElementById('mobileInput').value.trim();
-      const email = document.getElementById('emailInput').value.trim();
-      if (name && mobile && email) {
-        // Show message below form
-        document.getElementById('messageBox').innerText = `Hello ${name}!\nI miss you bhai`;
-        document.getElementById('messageBox').style.display = 'block';
-        document.getElementById('videoSection').style.display = 'block';
-        // Show success toast
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.innerText = 'Form submitted successfully!';
-        document.body.appendChild(toast);
-        setTimeout(() => {
-          toast.remove();
-        }, 3000);
+        50% {
+          transform: scale(1.1);
+        }
+        100% {
+          transform: scale(1);
+        }
       }
-    }
+      @keyframes hideIntro {
+        to {
+          opacity: 0;
+          visibility: hidden;
+        }
+      }
 
-    /* ---------- SETTINGS PANEL & PASSWORD ---------- */
-    document.getElementById('settingsBtn').addEventListener('click', () => {
-      document.getElementById('settingsPanel').classList.add('active');
-      initSky();         // initialize canvases when panel opens
-      initFireflies();
-    });
-    function verifyPassword() {
-      const input = document.getElementById('pwdInput').value.trim();
-      if (input === 'friendship') {
-        document.getElementById('passwordPrompt').style.display = 'none';
-        document.getElementById('settingsContent').style.display = 'block';
+      .rotating-sphere {
+        margin: 20px auto;
+        width: 150px;
+        height: 150px;
+        position: relative;
+        transform-style: preserve-3d;
+        animation: spin 6s linear infinite;
+        perspective: 1000px;
+      }
+      .face {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: radial-gradient(circle at center, #000 30%, #0ff 100%);
+        color: red;
+        font-size: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        text-shadow: 0 0 10px red;
+      }
+      .front {
+        transform: rotateY(0) translateZ(75px);
+      }
+      .back {
+        transform: rotateY(180deg) translateZ(75px);
+      }
+      @keyframes spin {
+        from {
+          transform: rotateY(0);
+        }
+        to {
+          transform: rotateY(360deg);
+        }
+      }
+
+      #main-content {
+        display: none;
+        padding: 40px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .form-box {
+        background: rgba(0, 0, 0, 0.75);
+        border: 2px solid #0ff;
+        box-shadow: 0 0 15px #0ff, 0 0 40px #0ff;
+        border-radius: 15px;
+        padding: 30px;
+        max-width: 400px;
+        width: 100%;
+        backdrop-filter: blur(5px);
+      }
+      .form-header {
+        font-size: 1rem;
+        margin: 10px 0 5px;
+      }
+      input {
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        border: none;
+        margin-bottom: 10px;
+        font-size: 1rem;
+        background: #e6f0ff;
+        box-shadow: 0 0 5px #0ff;
+      }
+      .submit-btn {
+        width: 100%;
+        padding: 10px;
+        margin-top: 15px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(45deg, #00f, #f0f);
+        color: #fff;
+        cursor: pointer;
+        box-shadow: 0 0 10px #00f, 0 0 20px #f0f;
+      }
+      .msg {
+        margin-top: 15px;
+        font-size: 0.95rem;
+        text-align: center;
+        white-space: pre-line;
+        text-shadow: 0 0 10px #0ff;
+      }
+      .video-btn {
+        width: 100%;
+        margin-top: 10px;
+        padding: 10px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(45deg, #00f, #f0f);
+        color: #fff;
+        cursor: pointer;
+        box-shadow: 0 0 8px #0ff;
+      }
+      .watch-heading {
+        margin-top: 25px;
+        font-size: 1.2rem;
+        text-align: center;
+        text-shadow: 0 0 10px #0ff;
+      }
+      a {
+        text-decoration: none;
+      }
+
+      /* ---------- SETTINGS BUTTON + PANEL ---------- */
+      #settingsBtn {
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        z-index: 999;
+        background: #000;
+        color: #0ff;
+        border: 2px solid #0ff;
+        padding: 10px 15px;
+        font-size: 16px;
+        border-radius: 10px;
+        cursor: pointer;
+        box-shadow: 0 0 10px #0ff;
+      }
+      #settingsPanel {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 100%;
+        max-width: 400px;
+        height: 100%;
+        background: #000;
+        color: #0ff;
+        overflow-y: auto;
+        z-index: 10000;
+        box-shadow: -5px 0 20px #0ff;
+        padding: 20px;
+        transition: right 0.5s ease;
+        font-family: 'Courier New', monospace;
+      }
+      #settingsPanel.active {
+        right: 0;
+      }
+      #settingsPanel input {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        font-size: 1rem;
+        background: #e6f0ff;
+        border-radius: 8px;
+        border: none;
+      }
+      #settingsPanel button {
+        width: 100%;
+        padding: 10px;
+        font-size: 1rem;
+        background: linear-gradient(45deg, #00f, #f0f);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        margin-top: 5px;
+        box-shadow: 0 0 10px #00f, 0 0 20px #f0f;
+      }
+      .profile {
+        margin-bottom: 30px;
+      }
+      .profile h3 {
+        margin-bottom: 10px;
+      }
+      .photos {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      .photos img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 10px;
+        box-shadow: 0 0 10px #0ff;
+        cursor: pointer;
+        transition: transform 0.3s;
+      }
+      .photos img:hover {
+        transform: scale(1.08);
+      }
+      .shayari {
+        font-size: 1rem;
+        text-shadow: 0 0 10px #0ff;
+      }
+      .typewriter {
+        display: inline-block;
+        overflow: hidden;
+        white-space: nowrap;
+        border-right: 2px solid #0ff;
+      }
+      @keyframes typing {
+        from {
+          width: 0;
+        }
+        to {
+          width: 100%;
+        }
+      }
+      @keyframes blink-caret {
+        50% {
+          border-color: transparent;
+        }
+      }
+      .section-title {
+        font-size: 1.3rem;
+        margin: 20px 0 10px;
+        text-shadow: 0 0 10px #0ff;
+      }
+      .about-text {
+        font-size: 1rem;
+        margin-bottom: 20px;
+        white-space: pre-line;
+        text-shadow: 0 0 8px #0ff;
+      }
+      .contact-section {
+        margin-top: 20px;
+        text-align: center;
+        font-size: 1rem;
+        text-shadow: 0 0 10px #0ff;
+      }
+      #closeSettings {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        background: transparent;
+        color: #0ff;
+        font-size: 24px;
+        border: none;
+        cursor: pointer;
+      }
+
+      /* ---------- FULLSCREEN IMAGE MODAL ---------- */
+      #imageModal {
+        display: none;
+        position: fixed;
+        z-index: 15000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.95);
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      }
+      #imageModal img {
+        max-width: 90vw;
+        max-height: 80vh;
+        border-radius: 10px;
+        box-shadow: 0 0 25px #0ff;
+      }
+      #imageModal .caption {
+        margin: 15px auto;
+        text-align: center;
+        color: #0ff;
+        font-size: 1.1rem;
+        text-shadow: 0 0 10px #0ff;
+        max-width: 90%;
+      }
+      #imageModal .closeBtn,
+      #imageModal .prev,
+      #imageModal .next {
+        position: absolute;
+        color: #0ff;
+        font-size: 40px;
+        font-weight: bold;
+        user-select: none;
+        cursor: pointer;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 50%;
+        padding: 5px 12px;
+        transition: 0.3s;
+      }
+      #imageModal .closeBtn {
+        top: 20px;
+        right: 35px;
+      }
+      #imageModal .prev {
+        top: 50%;
+        left: 20px;
+        transform: translateY(-50%);
+      }
+      #imageModal .next {
+        top: 50%;
+        right: 20px;
+        transform: translateY(-50%);
+      }
+      #imageModal .prev:hover,
+      #imageModal .next:hover,
+      #imageModal .closeBtn:hover {
+        color: #f00;
+        background: rgba(0, 0, 0, 0.8);
+      }
+
+      /* ---------- NEW FEATURES STYLES ---------- */
+
+      /* 29. Glassmorphism on Profile Cards */
+      .profile {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 15px;
+        border-radius: 12px;
+      }
+
+      /* 25 & 27. Canvas layers for Night Sky + Fireflies in Settings */
+      #starCanvas,
+      #fireflyCanvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -2; /* settingsPanel के पीछे */
+      }
+
+      /* 30. Floating Heart Trails */
+      .heart {
+        position: absolute;
+        font-size: 16px;
+        color: pink;
+        pointer-events: none;
+        animation: floatUp 2s ease-out forwards;
+      }
+      @keyframes floatUp {
+        to {
+          transform: translateY(-50px);
+          opacity: 0;
+        }
+      }
+
+      /* 28. Parallax: simple selector */
+      .parallax {
+        position: relative;
+        will-change: transform;
+      }
+
+      /* 26. Handwritten Signature (SVG text) */
+      #signatureSVG text {
+        fill: none;
+        stroke: #0ff;
+        stroke-width: 2;
+        stroke-dasharray: 1000;
+        stroke-dashoffset: 1000;
+        font-family: 'Pacifico', cursive;
+        font-size: 2rem;
+      }
+      @keyframes draw {
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
+    </style>
+
+    <!-- Google Font for signature (Pacifico) -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <!-- ---------- INTRO SPLASH ---------- -->
+    <div id="intro">
+      <img src="intro.png" alt="Intro" />
+    </div>
+
+    <!-- ---------- CANVAS BACKGROUNDS FOR MAIN ---------- -->
+    <canvas id="starCanvasMain"></canvas>
+    <canvas id="fireflyCanvasMain"></canvas>
+
+    <!-- ---------- MAIN CONTENT ---------- -->
+    <div id="main-content">
+      <div class="rotating-sphere">
+        <div class="face front">ANS</div>
+        <div class="face back">NaitikSingh</div>
+      </div>
+      <div class="form-box">
+        <h3 class="form-header">Full Name</h3>
+        <input type="text" id="nameInput" placeholder="Enter your name" />
+        <h3 class="form-header">Mobile Number</h3>
+        <input type="text" id="mobileInput" placeholder="Enter your number" />
+        <h3 class="form-header">Email</h3>
+        <input type="email" id="emailInput" placeholder="Enter your email" />
+        <button class="submit-btn" onclick="handleSubmit()">🚀submit</button>
+        <div class="msg" id="messageBox" style="display: none"></div>
+        <div id="videoSection" style="display: none">
+          <h2 class="watch-heading">🎵Watch Videos:</h2>
+          <a
+            href="https://youtu.be/f72iVBTuSbw?si=yrpkT7uudpRakq7T"
+            target="_blank"
+          >
+            <button class="video-btn">😂AdiNaiSat</button>
+          </a>
+          <a
+            href="https://youtu.be/IgM1lAXppwI?si=TywO3SPv1tPph8KW"
+            target="_blank"
+          >
+            <button class="video-btn">🎶YouTube🥺</button>
+          </a>
+          <a
+            href="https://youtu.be/BTRPBiE_1lA?si=CIZYJGp-V0m0cauU"
+            target="_blank"
+          >
+            <button class="video-btn">🎤friends forever ☺️</button>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- SETTINGS BUTTON + PANEL ---------- -->
+    <button id="settingsBtn">⚙️</button>
+    <div id="settingsPanel">
+      <!-- Canvas layers sit behind all content -->
+      <canvas id="starCanvas"></canvas>
+      <canvas id="fireflyCanvas"></canvas>
+      <button id="closeSettings" onclick="closeSettings()">close ⚙️</button>
+
+      <div id="passwordPrompt">
+        <h3>Enter Password</h3>
+        <input type="password" id="pwdInput" placeholder="Enter password" />
+        <button onclick="verifyPassword()">Unlock</button>
+        <p
+          id="pwdError"
+          class="msg"
+          style="color: red; display: none"
+        >
+          Incorrect password!
+        </p>
+      </div>
+
+      <div id="settingsContent" style="display: none">
+        <!-- Profiles (now glassmorphic, with parallax class) -->
+        <h2 class="section-title">Profiles</h2>
+        <div class="profile parallax">
+          <h3>NAITIK</h3>
+          <div class="photos">
+            <img src="naitik1.jpg" alt="rajput" />
+            <img src="naitik2.jpg" alt="naitik" />
+            <img src="naitik3.jpg" alt="singh" />
+          </div>
+          <p class="shayari">
+            <span class="typewriter">
+              मैं हूं दोस्ती का सबसे प्यारा चेहरा, <br />
+              दिल से जुड़ा, हर वक्त का सहारा।🧐🧐
+            </span>
+          </p>
+        </div>
+        <div class="profile parallax">
+          <h3>SATYAM</h3>
+          <div class="photos">
+            <img src="satyam1.jpg" alt="Satyam 1" />
+            <img src="satyam2.jpg" alt="Satyam 2" />
+            <img src="satyam3.jpg" alt="Satyam 3" />
+          </div>
+          <p class="shayari">
+            <span class="typewriter">
+              सच्चाई में बसा नाम है तेरा,<br />
+              दोस्ती की रूह है तू मेरा सच्चा सहारा।🥰🥰
+            </span>
+          </p>
+        </div>
+        <div class="profile parallax">
+          <h3>ADITYA</h3>
+          <div class="photos">
+            <img src="aditya1.jpg" alt="Aditya 1" />
+            <img src="aditya2.jpg" alt="Aditya 2" />
+            <img src="aditya3.jpg" alt="Aditya 3" />
+          </div>
+          <p class="shayari">
+            <span class="typewriter">
+              तेरी हँसी में जादू है कुछ ऐसा,<br />
+              जो ग़मों को भी मुस्कान बना दे वैसा।😂😂
+            </span>
+          </p>
+        </div>
+        <h2 class="section-title parallax">About</h2>
+        <p class="about-text parallax">
+          हमने इस वेबसाइट को इसलिए बनाया क्योंकि हमारी दोस्ती खास है।<br />
+          यह यादें, इमोशंस और हँसी के लम्हों को हमेशा ज़िंदा रखती है।
+        </p>
+        <h2 class="section-title parallax">School Life</h2>
+        <p class="about-text parallax">
+          स्कूल का हर दिन खास था <br />
+          हमारे नम्बर भले कम आए हों<br />
+          पर दुखी मत हो भाई <br />
+          जो होता है भले के लिए होता है
+        </p>
+        <div class="contact-section parallax">
+          <p>Phone: 9005222683📞</p>
+          <p><em>Wait for your call</em></p>
+        </div>
+        <!-- 26. Handwritten Signature Effect -->
+        <h2 class="section-title parallax">Signature</h2>
+        <input
+          type="text"
+          id="signatureInput"
+          placeholder="Enter name for signature"
+        />
+        <button onclick="drawSignature()">Draw Signature</button>
+        <svg id="signatureSVG" width="100%" height="80"></svg>
+      </div>
+    </div>
+
+    <!-- ---------- FULLSCREEN IMAGE MODAL STRUCTURE ---------- -->
+    <div id="imageModal">
+      <span class="closeBtn" onclick="closeImageModal()">&times;</span>
+      <span class="prev" onclick="changeImage(-1)">&#10094;</span>
+      <img id="modalImage" src="" alt="Full Image" />
+      <span class="next" onclick="changeImage(1)">&#10095;</span>
+      <div class="caption" id="modalCaption"></div>
+    </div>
+
+    <!-- ---------- SCRIPTS ---------- -->
+    <script>
+      /* ---------- INTRO LOGIC ---------- */
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          document.getElementById('intro').style.display = 'none';
+          document.getElementById('main-content').style.display = 'flex';
+
+          // Main Content पर एनिमेशन इनिशियलाइज़
+          initSkyMain();
+          initFirefliesMain();
+          initParallaxMain();
+          initHeartTrailMain();
+        }, 4000);
+      });
+
+      /* ---------- FORM SUBMIT ---------- */
+      function handleSubmit() {
+        const name = document.getElementById('nameInput').value.trim();
+        if (name !== '') {
+          document.getElementById('messageBox').innerText = `Hello ${name}!\nI miss you bhai`;
+          document.getElementById('messageBox').style.display = 'block';
+          document.getElementById('videoSection').style.display = 'block';
+        }
+      }
+
+      /* ---------- SETTINGS PANEL & PASSWORD ---------- */
+      document.getElementById('settingsBtn').addEventListener('click', () => {
+        document.getElementById('settingsPanel').classList.add('active');
+        initSky(); // initialize settings के लिए
+        initFireflies();
+      });
+      function verifyPassword() {
+        const input = document.getElementById('pwdInput').value.trim();
+        if (input === 'friendship') {
+          document.getElementById('passwordPrompt').style.display = 'none';
+          document.getElementById('settingsContent').style.display = 'block';
+          document.getElementById('pwdError').style.display = 'none';
+          document.querySelectorAll('.typewriter').forEach((el) => {
+            el.style.animation =
+              'typing 3s steps(40,end), blink-caret .75s step-end infinite';
+          });
+        } else {
+          document.getElementById('pwdError').style.display = 'block';
+        }
+      }
+      function closeSettings() {
+        document.getElementById('settingsPanel').classList.remove('active');
+        document.getElementById('pwdInput').value = '';
+        document.getElementById('passwordPrompt').style.display = 'block';
+        document.getElementById('settingsContent').style.display = 'none';
         document.getElementById('pwdError').style.display = 'none';
-        document.querySelectorAll('.typewriter').forEach(el => {
-          el.style.animation = 'typing 3s steps(40,end), blink-caret .75s step-end infinite';
-        });
-      } else {
-        document.getElementById('pwdError').style.display = 'block';
       }
-    }
-    function closeSettings() {
-      document.getElementById('settingsPanel').classList.remove('active');
-      document.getElementById('pwdInput').value = '';
-      document.getElementById('passwordPrompt').style.display = 'block';
-      document.getElementById('settingsContent').style.display = 'none';
-      document.getElementById('pwdError').style.display = 'none';
-    }
 
-    /* ---------- IMAGE MODAL LOGIC ---------- */
-    let images = [], currentIndex = 0;
-    document.querySelectorAll('.photos img').forEach((img, idx) => {
-      images.push(img);
-      img.addEventListener('click', () => openImageModal(idx));
-    });
-    function openImageModal(idx) {
-      currentIndex = idx;
-      const modal = document.getElementById('imageModal');
-      document.getElementById('modalImage').src = images[idx].src;
-      document.getElementById('modalCaption').textContent = images[idx].alt || '';
-      modal.style.display = 'flex';
-    }
-    function closeImageModal() {
-      document.getElementById('imageModal').style.display = 'none';
-    }
-    function changeImage(step) {
-      currentIndex = (currentIndex + step + images.length) % images.length;
-      document.getElementById('modalImage').src = images[currentIndex].src;
-      document.getElementById('modalCaption').textContent = images[currentIndex].alt || '';
-    }
-    document.addEventListener('keydown', e => {
-      const modal = document.getElementById('imageModal');
-      if (modal.style.display === 'flex') {
-        if (e.key === 'ArrowRight') changeImage(1);
-        else if (e.key === 'ArrowLeft') changeImage(-1);
-        else if (e.key === 'Escape') closeImageModal();
+      /* ---------- IMAGE MODAL LOGIC ---------- */
+      let images = [],
+        currentIndex = 0;
+      document.querySelectorAll('.photos img').forEach((img, idx) => {
+        images.push(img);
+        img.addEventListener('click', () => openImageModal(idx));
+      });
+      function openImageModal(idx) {
+        currentIndex = idx;
+        const modal = document.getElementById('imageModal');
+        document.getElementById('modalImage').src = images[idx].src;
+        document.getElementById('modalCaption').textContent =
+          images[idx].alt || '';
+        modal.style.display = 'flex';
       }
-    });
+      function closeImageModal() {
+        document.getElementById('imageModal').style.display = 'none';
+      }
+      function changeImage(step) {
+        currentIndex = (currentIndex + step + images.length) % images.length;
+        document.getElementById('modalImage').src = images[currentIndex].src;
+        document.getElementById('modalCaption').textContent =
+          images[currentIndex].alt || '';
+      }
+      document.addEventListener('keydown', (e) => {
+        const modal = document.getElementById('imageModal');
+        if (modal.style.display === 'flex') {
+          if (e.key === 'ArrowRight') changeImage(1);
+          else if (e.key === 'ArrowLeft') changeImage(-1);
+          else if (e.key === 'Escape') closeImageModal();
+        }
+      });
 
-    /* ---------- NEW FEATURE SCRIPTS IN SETTINGS ---------- */
-
-    /* 25. Animated Night Sky with Shooting Stars */
-    let starCanvas, starCtx, stars = [], shootingStars = [];
-    function initSky() {
-      const panel = document.getElementById('settingsPanel');
-      starCanvas = document.getElementById('starCanvas');
-      starCtx = starCanvas.getContext('2d');
-      resizeCanvasToPanel(starCanvas, panel);
-      createStars();
-      requestAnimationFrame(animateSky);
-    }
-    function resizeCanvasToPanel(canvas, panel) {
-      canvas.width = panel.clientWidth;
-      canvas.height = panel.clientHeight;
-    }
-    window.addEventListener('resize', () => {
-      if (starCanvas) {
+      /* ---------- NEW FEATURE SCRIPTS FOR SETTINGS ---------- */
+      /* 25. Animated Night Sky with Shooting Stars */
+      let starCanvas, starCtx, stars = [], shootingStars = [];
+      function initSky() {
         const panel = document.getElementById('settingsPanel');
+        starCanvas = document.getElementById('starCanvas');
+        starCtx = starCanvas.getContext('2d');
         resizeCanvasToPanel(starCanvas, panel);
+        createStars();
+        requestAnimationFrame(animateSky);
+      }
+      function resizeCanvasToPanel(canvas, panel) {
+        canvas.width = panel.clientWidth;
+        canvas.height = panel.clientHeight;
+      }
+      window.addEventListener('resize', () => {
+        if (starCanvas) {
+          const panel = document.getElementById('settingsPanel');
+          resizeCanvasToPanel(starCanvas, panel);
+          resizeCanvasToPanel(fireflyCanvas, panel);
+        }
+        if (starCanvasMain) {
+          resizeCanvasToPanel(starCanvasMain, document.body);
+          resizeCanvasToPanel(fireflyCanvasMain, document.body);
+        }
+      });
+      function createStars() {
+        stars = [];
+        for (let i = 0; i < 150; i++) {
+          stars.push({
+            x: Math.random() * starCanvas.width,
+            y: Math.random() * starCanvas.height,
+            radius: Math.random() * 1.2,
+            alpha: Math.random(),
+            alphaDir: Math.random() * 0.02 + 0.005,
+          });
+        }
+      }
+      function animateSky() {
+        starCtx.clearRect(0, 0, starCanvas.width, starCanvas.height);
+        stars.forEach((s) => {
+          s.alpha += s.alphaDir;
+          if (s.alpha <= 0 || s.alpha >= 1) s.alphaDir *= -1;
+          starCtx.beginPath();
+          starCtx.arc(s.x, s.y, s.radius, 0, 2 * Math.PI);
+          starCtx.fillStyle = `rgba(255,255,255,${s.alpha})`;
+          starCtx.fill();
+        });
+        if (Math.random() < 0.005) createShootingStar();
+        shootingStars.forEach((ss, idx) => {
+          ss.x += ss.vx;
+          ss.y += ss.vy;
+          ss.life--;
+          starCtx.beginPath();
+          starCtx.moveTo(ss.x, ss.y);
+          starCtx.lineTo(
+            ss.x - ss.length * ss.vx,
+            ss.y - ss.length * ss.vy
+          );
+          starCtx.strokeStyle = `rgba(255,255,255,${ss.life / ss.maxLife})`;
+          starCtx.lineWidth = 1.5;
+          starCtx.stroke();
+          if (ss.life <= 0) shootingStars.splice(idx, 1);
+        });
+        requestAnimationFrame(animateSky);
+      }
+      function createShootingStar() {
+        const sx = Math.random() * starCanvas.width * 0.5;
+        const sy = Math.random() * starCanvas.height * 0.3;
+        const angle = Math.PI / 4 + (Math.random() * (Math.PI / 6) - Math.PI / 12);
+        const speed = Math.random() * 4 + 4;
+        const vx = Math.cos(angle) * speed;
+        const vy = Math.sin(angle) * speed;
+        shootingStars.push({
+          x: sx,
+          y: sy,
+          vx: vx,
+          vy: vy,
+          length: Math.random() * 80 + 60,
+          life: Math.floor(Math.random() * 20 + 20),
+          maxLife: 40,
+        });
+      }
+
+      /* 27. Fireflies / Floating Lights */
+      let fireflyCanvas, fireflyCtx, fireflies = [];
+      function initFireflies() {
+        const panel = document.getElementById('settingsPanel');
+        fireflyCanvas = document.getElementById('fireflyCanvas');
+        fireflyCtx = fireflyCanvas.getContext('2d');
         resizeCanvasToPanel(fireflyCanvas, panel);
+        createFireflies();
+        requestAnimationFrame(animateFireflies);
       }
-    });
-    function createStars() {
-      stars = [];
-      for (let i = 0; i < 150; i++) {
-        stars.push({
-          x: Math.random() * starCanvas.width,
-          y: Math.random() * starCanvas.height,
-          radius: Math.random() * 1.2,
-          alpha: Math.random(),
-          alphaDir: Math.random() * 0.02 + 0.005
+      function createFireflies() {
+        fireflies = [];
+        for (let i = 0; i < 30; i++) {
+          fireflies.push({
+            x: Math.random() * fireflyCanvas.width,
+            y: Math.random() * fireflyCanvas.height,
+            radius: Math.random() * 2 + 1,
+            alpha: Math.random() * 0.5 + 0.5,
+            vx: (Math.random() - 0.5) * 0.3,
+            vy: (Math.random() - 0.5) * 0.3,
+          });
+        }
+      }
+      function animateFireflies() {
+        fireflyCtx.clearRect(0, 0, fireflyCanvas.width, fireflyCanvas.height);
+        fireflies.forEach((f) => {
+          f.x += f.vx;
+          f.y += f.vy;
+          if (f.x < 0 || f.x > fireflyCanvas.width) f.vx *= -1;
+          if (f.y < 0 || f.y > fireflyCanvas.height) f.vy *= -1;
+          const gradient = fireflyCtx.createRadialGradient(
+            f.x,
+            f.y,
+            0,
+            f.x,
+            f.y,
+            f.radius * 4
+          );
+          gradient.addColorStop(0, `rgba(255,255,153,${f.alpha})`);
+          gradient.addColorStop(1, 'rgba(255,255,153,0)');
+          fireflyCtx.beginPath();
+          fireflyCtx.arc(f.x, f.y, f.radius * 4, 0, 2 * Math.PI);
+          fireflyCtx.fillStyle = gradient;
+          fireflyCtx.fill();
         });
+        requestAnimationFrame(animateFireflies);
       }
-    }
-    function animateSky() {
-      starCtx.clearRect(0, 0, starCanvas.width, starCanvas.height);
-      // Draw Twinkling Stars
-      stars.forEach(s => {
-        s.alpha += s.alphaDir;
-        if (s.alpha <= 0 || s.alpha >= 1) s.alphaDir *= -1;
-        starCtx.beginPath();
-        starCtx.arc(s.x, s.y, s.radius, 0, 2 * Math.PI);
-        starCtx.fillStyle = `rgba(255,255,255,${s.alpha})`;
-        starCtx.fill();
-      });
-      // Possibly create a new shooting star
-      if (Math.random() < 0.005) createShootingStar();
-      // Animate existing shooting stars
-      shootingStars.forEach((ss, idx) => {
-        ss.x += ss.vx;
-        ss.y += ss.vy;
-        ss.life--;
-        // draw
-        starCtx.beginPath();
-        starCtx.moveTo(ss.x, ss.y);
-        starCtx.lineTo(ss.x - ss.length * ss.vx, ss.y - ss.length * ss.vy);
-        starCtx.strokeStyle = 'rgba(255,255,255,' + (ss.life / ss.maxLife) + ')';
-        starCtx.lineWidth = 1.5;
-        starCtx.stroke();
-        if (ss.life <= 0) shootingStars.splice(idx, 1);
-      });
-      requestAnimationFrame(animateSky);
-    }
-    function createShootingStar() {
-      const sx = Math.random() * starCanvas.width * 0.5;
-      const sy = Math.random() * starCanvas.height * 0.3;
-      const angle = Math.PI / 4 + (Math.random() * (Math.PI / 6) - Math.PI / 12);
-      const speed = Math.random() * 4 + 4;
-      const vx = Math.cos(angle) * speed;
-      const vy = Math.sin(angle) * speed;
-      shootingStars.push({
-        x: sx,
-        y: sy,
-        vx: vx,
-        vy: vy,
-        length: Math.random() * 80 + 60,
-        life: Math.floor(Math.random() * 20 + 20),
-        maxLife: 40
-      });
-    }
 
-    /* 27. Fireflies / Floating Lights */
-    let fireflyCanvas, fireflyCtx, fireflies = [];
-    function initFireflies() {
-      const panel = document.getElementById('settingsPanel');
-      fireflyCanvas = document.getElementById('fireflyCanvas');
-      fireflyCtx = fireflyCanvas.getContext('2d');
-      resizeCanvasToPanel(fireflyCanvas, panel);
-      createFireflies();
-      requestAnimationFrame(animateFireflies);
-    }
-    function createFireflies() {
-      fireflies = [];
-      for (let i = 0; i < 30; i++) {
-        fireflies.push({
-          x: Math.random() * fireflyCanvas.width,
-          y: Math.random() * fireflyCanvas.height,
-          radius: Math.random() * 2 + 1,
-          alpha: Math.random() * 0.5 + 0.5,
-          vx: (Math.random() - 0.5) * 0.3,
-          vy: (Math.random() - 0.5) * 0.3
+      /* 28. Parallax Scrolling FOR SETTINGS */
+      const parallaxItems = [];
+      function initParallax() {
+        const panel = document.getElementById('settingsPanel');
+        const elements = panel.querySelectorAll('.parallax');
+        elements.forEach((el) => {
+          parallaxItems.push({
+            el,
+            speed: Math.random() * 0.3 + 0.1, // 0.1–0.4
+          });
+        });
+        panel.addEventListener('scroll', () => {
+          const scrollTop = panel.scrollTop;
+          parallaxItems.forEach((item) => {
+            item.el.style.transform = `translateY(${
+              scrollTop * item.speed * -1
+            }px)`;
+          });
         });
       }
-    }
-    function animateFireflies() {
-      fireflyCtx.clearRect(0, 0, fireflyCanvas.width, fireflyCanvas.height);
-      fireflies.forEach(f => {
-        f.x += f.vx;
-        f.y += f.vy;
-        if (f.x < 0 || f.x > fireflyCanvas.width) f.vx *= -1;
-        if (f.y < 0 || f.y > fireflyCanvas.height) f.vy *= -1;
-        const gradient = fireflyCtx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.radius * 4);
-        gradient.addColorStop(0, `rgba(255,255,153,${f.alpha})`);
-        gradient.addColorStop(1, 'rgba(255,255,153,0)');
-        fireflyCtx.beginPath();
-        fireflyCtx.arc(f.x, f.y, f.radius * 4, 0, 2 * Math.PI);
-        fireflyCtx.fillStyle = gradient;
-        fireflyCtx.fill();
-      });
-      requestAnimationFrame(animateFireflies);
-    }
 
-    /* 28. Parallax Scrolling */
-    const parallaxItems = [];
-    function initParallax() {
-      const panel = document.getElementById('settingsPanel');
-      const elements = panel.querySelectorAll('.parallax');
-      elements.forEach(el => {
-        parallaxItems.push({
-          el,
-          speed: (Math.random() * 0.3) + 0.1
+      /* 26. Handwritten Signature Effect */
+      function drawSignature() {
+        const txt = document.getElementById('signatureInput').value.trim();
+        if (!txt) return;
+        const svg = document.getElementById('signatureSVG');
+        svg.innerHTML = '';
+        const textEl = document.createElementNS(
+          'http://www.w3.org/2000/svg',
+          'text'
+        );
+        textEl.setAttribute('x', '10');
+        textEl.setAttribute('y', '50');
+        textEl.textContent = txt;
+        svg.appendChild(textEl);
+        const pathLength = textEl.getComputedTextLength();
+        textEl.setAttribute('stroke-dasharray', pathLength);
+        textEl.setAttribute('stroke-dashoffset', pathLength);
+        textEl.style.animation = 'draw 3s ease forwards';
+      }
+
+      /* 30. Floating Heart Trails on Mouse Move FOR SETTINGS */
+      function initHeartTrail() {
+        const panel = document.getElementById('settingsPanel');
+        panel.addEventListener('mousemove', (e) => {
+          const heart = document.createElement('span');
+          heart.className = 'heart';
+          heart.textContent = '❤️';
+          const rect = panel.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          heart.style.left = x + 'px';
+          heart.style.top = y + 'px';
+          panel.appendChild(heart);
+          setTimeout(() => {
+            heart.remove();
+          }, 2000);
         });
-      });
-      panel.addEventListener('scroll', () => {
-        const scrollTop = panel.scrollTop;
-        parallaxItems.forEach(item => {
-          item.el.style.transform = `translateY(${scrollTop * item.speed * -1}px)`;
+      }
+
+      /* ---------- NEW FEATURE SCRIPTS FOR MAIN CONTENT ---------- */
+      /* 25. Animated Night Sky with Shooting Stars ON MAIN */
+      let starCanvasMain, starCtxMain, starsMain = [], shootingStarsMain = [];
+      function initSkyMain() {
+        starCanvasMain = document.getElementById('starCanvasMain');
+        starCtxMain = starCanvasMain.getContext('2d');
+        resizeCanvasToPanel(starCanvasMain, document.body);
+        createStarsMain();
+        requestAnimationFrame(animateSkyMain);
+      }
+      function createStarsMain() {
+        starsMain = [];
+        for (let i = 0; i < 100; i++) {
+          starsMain.push({
+            x: Math.random() * starCanvasMain.width,
+            y: Math.random() * starCanvasMain.height,
+            radius: Math.random() * 1.2,
+            alpha: Math.random(),
+            alphaDir: Math.random() * 0.02 + 0.005,
+          });
+        }
+      }
+      function animateSkyMain() {
+        starCtxMain.clearRect(
+          0,
+          0,
+          starCanvasMain.width,
+          starCanvasMain.height
+        );
+        starsMain.forEach((s) => {
+          s.alpha += s.alphaDir;
+          if (s.alpha <= 0 || s.alpha >= 1) s.alphaDir *= -1;
+          starCtxMain.beginPath();
+          starCtxMain.arc(s.x, s.y, s.radius, 0, 2 * Math.PI);
+          starCtxMain.fillStyle = `rgba(255,255,255,${s.alpha})`;
+          starCtxMain.fill();
         });
-      });
-    }
+        if (Math.random() < 0.005) createShootingStarMain();
+        shootingStarsMain.forEach((ss, idx) => {
+          ss.x += ss.vx;
+          ss.y += ss.vy;
+          ss.life--;
+          starCtxMain.beginPath();
+          starCtxMain.moveTo(ss.x, ss.y);
+          starCtxMain.lineTo(
+            ss.x - ss.length * ss.vx,
+            ss.y - ss.length * ss.vy
+          );
+          starCtxMain.strokeStyle = `rgba(255,255,255,${ss.life / ss.maxLife})`;
+          starCtxMain.lineWidth = 1.5;
+          starCtxMain.stroke();
+          if (ss.life <= 0) shootingStarsMain.splice(idx, 1);
+        });
+        requestAnimationFrame(animateSkyMain);
+      }
+      function createShootingStarMain() {
+        const sx = Math.random() * starCanvasMain.width * 0.5;
+        const sy = Math.random() * starCanvasMain.height * 0.3;
+        const angle = Math.PI / 4 + (Math.random() * (Math.PI / 6) - Math.PI / 12);
+        const speed = Math.random() * 4 + 4;
+        const vx = Math.cos(angle) * speed;
+        const vy = Math.sin(angle) * speed;
+        shootingStarsMain.push({
+          x: sx,
+          y: sy,
+          vx: vx,
+          vy: vy,
+          length: Math.random() * 80 + 60,
+          life: Math.floor(Math.random() * 20 + 20),
+          maxLife: 40,
+        });
+      }
 
-    /* 26. Handwritten Signature Effect */
-    function drawSignature() {
-      const txt = document.getElementById('signatureInput').value.trim();
-      if (!txt) return;
-      const svg = document.getElementById('signatureSVG');
-      svg.innerHTML = '';
-      const textEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      textEl.setAttribute('x', '10');
-      textEl.setAttribute('y', '50');
-      textEl.textContent = txt;
-      svg.appendChild(textEl);
-      const pathLength = textEl.getComputedTextLength();
-      textEl.setAttribute('stroke-dasharray', pathLength);
-      textEl.setAttribute('stroke-dashoffset', pathLength);
-      textEl.style.animation = `draw 3s ease forwards`;
-    }
+      /* 27. Fireflies / Floating Lights ON MAIN */
+      let fireflyCanvasMain, fireflyCtxMain, firefliesMain = [];
+      function initFirefliesMain() {
+        fireflyCanvasMain = document.getElementById('fireflyCanvasMain');
+        fireflyCtxMain = fireflyCanvasMain.getContext('2d');
+        resizeCanvasToPanel(fireflyCanvasMain, document.body);
+        createFirefliesMain();
+        requestAnimationFrame(animateFirefliesMain);
+      }
+      function createFirefliesMain() {
+        firefliesMain = [];
+        for (let i = 0; i < 30; i++) {
+          firefliesMain.push({
+            x: Math.random() * fireflyCanvasMain.width,
+            y: Math.random() * fireflyCanvasMain.height,
+            radius: Math.random() * 2 + 1,
+            alpha: Math.random() * 0.5 + 0.5,
+            vx: (Math.random() - 0.5) * 0.3,
+            vy: (Math.random() - 0.5) * 0.3,
+          });
+        }
+      }
+      function animateFirefliesMain() {
+        fireflyCtxMain.clearRect(
+          0,
+          0,
+          fireflyCanvasMain.width,
+          fireflyCanvasMain.height
+        );
+        firefliesMain.forEach((f) => {
+          f.x += f.vx;
+          f.y += f.vy;
+          if (f.x < 0 || f.x > fireflyCanvasMain.width) f.vx *= -1;
+          if (f.y < 0 || f.y > fireflyCanvasMain.height) f.vy *= -1;
+          const gradient = fireflyCtxMain.createRadialGradient(
+            f.x,
+            f.y,
+            0,
+            f.x,
+            f.y,
+            f.radius * 4
+          );
+          gradient.addColorStop(0, `rgba(255,255,153,${f.alpha})`);
+          gradient.addColorStop(1, 'rgba(255,255,153,0)');
+          fireflyCtxMain.beginPath();
+          fireflyCtxMain.arc(f.x, f.y, f.radius * 4, 0, 2 * Math.PI);
+          fireflyCtxMain.fillStyle = gradient;
+          fireflyCtxMain.fill();
+        });
+        requestAnimationFrame(animateFirefliesMain);
+      }
 
-    /* 30. Floating Heart Trails on Mouse Move */
-    function initHeartTrail() {
-      const panel = document.getElementById('settingsPanel');
-      panel.addEventListener('mousemove', e => {
-        const heart = document.createElement('span');
-        heart.className = 'cuiteheart';
-        heart.textContent = '☺️❤️';
-        const rect = panel.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        heart.style.left = x + 'px';
-        heart.style.top = y + 'px';
-        panel.appendChild(heart);
-        setTimeout(() => {
-          heart.remove();
-        }, 2000);
-      });
-    }
+      /* 28. Parallax Scrolling FOR MAIN CONTENT */
+      const parallaxItemsMain = [];
+      function initParallaxMain() {
+        const elements = document.querySelectorAll('.parallax');
+        elements.forEach((el) => {
+          parallaxItemsMain.push({
+            el,
+            speed: Math.random() * 0.3 + 0.1, // 0.1–0.4
+          });
+        });
+        window.addEventListener('scroll', () => {
+          const scrollTop = window.scrollY;
+          parallaxItemsMain.forEach((item) => {
+            item.el.style.transform = `translateY(${
+              scrollTop * item.speed * -1
+            }px)`;
+          });
+        });
+      }
 
-    /* Initialize parallax & heart trail once settings panel first shows */
-    document.addEventListener('DOMContentLoaded', () => {
-      initParallax();
-      initHeartTrail();
-    });
-  </script>
-</body>
+      /* 30. Floating Heart Trails on Mouse Move FOR MAIN */
+      function initHeartTrailMain() {
+        document.body.addEventListener('mousemove', (e) => {
+          const heart = document.createElement('span');
+          heart.className = 'heart';
+          heart.textContent = '❤️';
+          const x = e.clientX;
+          const y = e.clientY;
+          heart.style.left = x + 'px';
+          heart.style.top = y + 'px';
+          document.body.appendChild(heart);
+          setTimeout(() => {
+            heart.remove();
+          }, 2000);
+        });
+      }
+    </script><audio id="bgMusic" autoplay loop>
+  <source src="audio/dosti.mp3" type="audio/mpeg">
+</audio>
+
+<button onclick="toggleMusic()" class="music-btn">Pause Music</button>
+
+<script>
+  function toggleMusic() {
+    const music = document.getElementById("bgMusic");
+    const btn = document.querySelector(".music-btn");
+    if (music.paused) {
+      music.play();
+      btn.innerText = "Pause Music";
+    } else {
+      music.pause();
+      btn.innerText = "Play Music";
+    }
+  }
+</script>
+
+<style>
+  .music-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #222;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    z-index: 1000;
+  }
+</style>
+
+  </body>
 </html>
-
